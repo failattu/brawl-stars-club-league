@@ -9,7 +9,12 @@ from callbacks.callback_render_season_overview import callback_render_season_ove
 from layout.serve_column_season_overview import serve_column_season_overview
 
 DATABASE_URL = config('DATABASE_URL')
-URI = DATABASE_URL[:8] + 'ql' + DATABASE_URL[8:]
+CLUB_ID = config('CLUB_ID')
+DEV_ENV = config('DEV_ENV',default="no")
+if DEV_ENV == "yes":
+    URI = DATABASE_URL
+else:
+    URI = DATABASE_URL[:8] + 'ql' + DATABASE_URL[8:]
 
 BS = 'https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/lux/bootstrap.min.css'
 app = Dash(
@@ -130,7 +135,7 @@ def serve_layout():
                     [
                         'Brawl Attack (',
                         html.A(
-                            '#2YPY9LVV9',
+                            CLUB_ID,
                             href='https://brawlify.com/stats/club/2YPY9LVV9',
                             target='_blank',
                         ),
@@ -174,4 +179,4 @@ app.layout = serve_layout
 callback_render_season_overview(app)
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', debug=True, port=8050)

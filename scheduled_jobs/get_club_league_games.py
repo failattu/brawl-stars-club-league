@@ -8,22 +8,28 @@ from sqlalchemy.pool import NullPool
 
 from auxiliary_functions import get_season, get_event_day
 
+DEV_ENV = config('DEV_ENV',default="no")
 API_TOKEN = config('API_TOKEN')
 DATABASE_URL = config('DATABASE_URL')
-FIXIE_URL = config('FIXIE_URL')
-URI = DATABASE_URL[:8] + 'ql' + DATABASE_URL[8:]
+CLUB_ID = config('CLUB_ID')
+if DEV_ENV == "yes":
+    URI = DATABASE_URL
+else:
+    URI = DATABASE_URL[:8] + 'ql' + DATABASE_URL[8:]
+    FIXIE_URL = ('FIXIE_URL')
 
 date = datetime.utcnow()
 
-if date.weekday() in [3, 5, 0]:
+if date.weekday() in [3, 5, 0] or DEV_ENV == "yes":
 
     headers = {
         'Authorization' : f'Bearer {API_TOKEN}',
     }
-    proxies = {
-        'http'  : os.environ.get('FIXIE_URL', ''),
-        'https' : os.environ.get('FIXIE_URL', ''),
-    }
+    if DEV_ENV == "no":
+            proxies = {
+               'http'  : os.environ.get('FIXIE_URL', ''),
+               'https' : os.environ.get('FIXIE_URL', ''),
+            }
 
     engine = create_engine(URI, poolclass=NullPool)
     with engine.connect() as connection:
@@ -75,13 +81,18 @@ if date.weekday() in [3, 5, 0]:
     players6_are_club_members= []
 
     for member in club_members_list:
-
-        response = requests.get(
-            # the hashtag '#' is encoded as '%23' in the URL
-            f'https://api.brawlstars.com/v1/players/%23{member[1:]}/battlelog',
-            headers=headers,
-            proxies=proxies,
-        )
+        if DEV_ENV == "no":
+            response = requests.get(
+                # the hashtag '#' is encoded as '%23' in the URL
+                f'https://api.brawlstars.com/v1/players/%23{member[1:]}/battlelog',
+                headers=headers,
+                proxies=proxies,
+            )
+        else:
+            response = requests.get(
+                f'https://api.brawlstars.com/v1/players/%23{member[1:]}/battlelog',
+                headers=headers,
+            )
         battlelog = response.json()['items']
 
         for entry in battlelog:

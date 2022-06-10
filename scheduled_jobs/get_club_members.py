@@ -8,27 +8,43 @@ from sqlalchemy.pool import NullPool
 
 API_TOKEN = config('API_TOKEN')
 DATABASE_URL = config('DATABASE_URL')
-FIXIE_URL = config('FIXIE_URL')
-URI = DATABASE_URL[:8] + 'ql' + DATABASE_URL[8:]
+CLUB_ID = config('CLUB_ID')
+DEV_ENV = config('DEV_ENV',default="no")
+
+if DEV_ENV == "yes":
+    URI = DATABASE_URL
+else:
+    URI = DATABASE_URL[:8] + 'ql' + DATABASE_URL[8:]
+    FIXIE_URL = config('FIXIE_URL')
+
+
 
 date = datetime.utcnow()
 
-if date.weekday() == 2:
+if date.weekday() == 2 or DEV_ENV == "yes":
 
-    club_tag = '#2YPY9LVV9'
+    club_tag = CLUB_ID
+    if DEV_ENV == "no":
+            proxies = {
+               'http'  : os.environ.get('FIXIE_URL', ''),
+               'https' : os.environ.get('FIXIE_URL', ''),
+            }
     headers = {
         'Authorization' : f'Bearer {API_TOKEN}',
     }
-    proxies = {
-        'http'  : os.environ.get('FIXIE_URL', ''),
-        'https' : os.environ.get('FIXIE_URL', ''),
-    }
-    response = requests.get(
-        # the hashtag '#' is encoded as '%23' in the URL
-        f'https://api.brawlstars.com/v1/clubs/%23{club_tag[1:]}/members',
-        headers=headers,
-        proxies=proxies,
-    )
+    if DEV_ENV == "no":
+        response = requests.get(
+            # the hashtag '#' is encoded as '%23' in the URL
+            f'https://api.brawlstars.com/v1/clubs/%23{club_tag[1:]}/members',
+            headers=headers,
+            proxies=proxies,
+        )
+    else:
+        response = requests.get(
+            # the hashtag '#' is encoded as '%23' in the URL
+            f'https://api.brawlstars.com/v1/clubs/%23{club_tag[1:]}/members',
+            headers=headers,
+        )
     club_members_list = response.json()['items']
     
     season = f'{date.year}-{date.isocalendar().week}'
