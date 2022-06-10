@@ -1,4 +1,4 @@
-CREATE TABLE club_league_games(
+CREATE TABLE IF NOT EXISTS club_league_games(
     game_timestamp TEXT PRIMARY KEY,
     season TEXT,
     event_day TEXT,
