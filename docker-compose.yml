@@ -4,7 +4,7 @@ services:
   postgres_db:
     image: postgres:11.1
     environment:   # Set up postgres database name and password
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: SET_PASSWORD_TO_SECURE_LOCATION_IN_NEXT_VERSION
       POSTGRES_DB: brawlstars
       POSTGRES_USER: root
     expose:
@@ -29,10 +29,10 @@ services:
     command:
       python -u scheduled_jobs/get_club_members.py
     environment:
-      DATABASE_URL: postgresql://root:password@postgres_db:5432/brawlstars
+      DATABASE_URL: postgresql://root:SET_PASSWORD_TO_SECURE_LOCATION_IN_NEXT_VERSION@postgres_db:5432/brawlstars
       CLUB_ID: '#2YPY9LVV9'
       DEV_ENV: 'yes'
-      API_TOKEN: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjUwNjI0Zjc0LTYxYmYtNDBjYS1iM2M2LThhOGQxOGVkOGFmYiIsImlhdCI6MTY1NDg5MTQ5OSwic3ViIjoiZGV2ZWxvcGVyLzk4NGFlMjc2LTEyYzUtMDRiNi02MzMxLWZmMWIxYmZjMTM2ZiIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiNzcuMjI1LjIxNy4yNDgiXSwidHlwZSI6ImNsaWVudCJ9XX0.6kTCd_nE4DP8r6MaPyCRQK1v3319QEhhq1aza4M_Z2UX-ih8-QbqbVLH3y6RZiM7jDxu6F2WC7QMLrTMfN9Lhg
+      API_TOKEN: SET_TOKEN_TO_SECURE_LOCATION_IN_NEXT_VERSION
   scheduler_games:
     build:
       context: .
@@ -42,10 +42,10 @@ services:
     command:
       python -u scheduled_jobs/get_club_league_games.py
     environment:
-      DATABASE_URL: postgresql://root:password@postgres_db:5432/brawlstars
+      DATABASE_URL: postgresql://root:SET_PASSWORD_TO_SECURE_LOCATION_IN_NEXT_VERSION@postgres_db:5432/brawlstars
       CLUB_ID: '#2YPY9LVV9'
       DEV_ENV: 'yes'
-      API_TOKEN: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjUwNjI0Zjc0LTYxYmYtNDBjYS1iM2M2LThhOGQxOGVkOGFmYiIsImlhdCI6MTY1NDg5MTQ5OSwic3ViIjoiZGV2ZWxvcGVyLzk4NGFlMjc2LTEyYzUtMDRiNi02MzMxLWZmMWIxYmZjMTM2ZiIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiNzcuMjI1LjIxNy4yNDgiXSwidHlwZSI6ImNsaWVudCJ9XX0.6kTCd_nE4DP8r6MaPyCRQK1v3319QEhhq1aza4M_Z2UX-ih8-QbqbVLH3y6RZiM7jDxu6F2WC7QMLrTMfN9Lhg
+      API_TOKEN: SET_TOKEN_TO_SECURE_LOCATION_IN_NEXT_VERSION
   python_app:
     build:
       context: .
@@ -57,8 +57,8 @@ services:
     ports:
       - 8050:8050
     environment:
-      DATABASE_URL: postgresql://root:password@postgres_db:5432/brawlstars
+      DATABASE_URL: postgresql://root:SET_PASSWORD_TO_SECURE_LOCATION_IN_NEXT_VERSION@postgres_db:5432/brawlstars
       CLUB_ID: '#2YPY9LVV9'
       DEV_ENV: 'yes'
-      API_TOKEN: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjUwNjI0Zjc0LTYxYmYtNDBjYS1iM2M2LThhOGQxOGVkOGFmYiIsImlhdCI6MTY1NDg5MTQ5OSwic3ViIjoiZGV2ZWxvcGVyLzk4NGFlMjc2LTEyYzUtMDRiNi02MzMxLWZmMWIxYmZjMTM2ZiIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiNzcuMjI1LjIxNy4yNDgiXSwidHlwZSI6ImNsaWVudCJ9XX0.6kTCd_nE4DP8r6MaPyCRQK1v3319QEhhq1aza4M_Z2UX-ih8-QbqbVLH3y6RZiM7jDxu6F2WC7QMLrTMfN9Lhg
+      API_TOKEN: SET_TOKEN_TO_SECURE_LOCATION_IN_NEXT_VERSION
 
