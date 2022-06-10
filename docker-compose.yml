@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  postgres_db:
+    image: postgres:11.1
+    environment:   # Set up postgres database name and password
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: brawlstars
+      POSTGRES_USER: root
+    expose:
+      - "5432"
+
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d
+      - ./sql_scripts/create_club_league_games_table.sql:/docker-entrypoint-initdb.d/create_club_league_games_table.sql
+      - ./sql_scripts/create_job_log_table.sql:/docker-entrypoint-initdb.d/create_job_log_table.sql
+      - ./sql_scripts/create_club_members_table.sql:/docker-entrypoint-initdb.d/create_club_members_table.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d brawlstars"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  scheduler_members:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres_db
+    command:
+      python -u scheduled_jobs/get_club_members.py
+    environment:
+      DATABASE_URL: postgresql://root:password@postgres_db:5432/brawlstars
+      CLUB_ID: '#2YPY9LVV9'
+      DEV_ENV: 'yes'
+      API_TOKEN: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjUwNjI0Zjc0LTYxYmYtNDBjYS1iM2M2LThhOGQxOGVkOGFmYiIsImlhdCI6MTY1NDg5MTQ5OSwic3ViIjoiZGV2ZWxvcGVyLzk4NGFlMjc2LTEyYzUtMDRiNi02MzMxLWZmMWIxYmZjMTM2ZiIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiNzcuMjI1LjIxNy4yNDgiXSwidHlwZSI6ImNsaWVudCJ9XX0.6kTCd_nE4DP8r6MaPyCRQK1v3319QEhhq1aza4M_Z2UX-ih8-QbqbVLH3y6RZiM7jDxu6F2WC7QMLrTMfN9Lhg
+  scheduler_games:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - scheduler_members
+    command:
+      python -u scheduled_jobs/get_club_league_games.py
+    environment:
+      DATABASE_URL: postgresql://root:password@postgres_db:5432/brawlstars
+      CLUB_ID: '#2YPY9LVV9'
+      DEV_ENV: 'yes'
+      API_TOKEN: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjUwNjI0Zjc0LTYxYmYtNDBjYS1iM2M2LThhOGQxOGVkOGFmYiIsImlhdCI6MTY1NDg5MTQ5OSwic3ViIjoiZGV2ZWxvcGVyLzk4NGFlMjc2LTEyYzUtMDRiNi02MzMxLWZmMWIxYmZjMTM2ZiIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiNzcuMjI1LjIxNy4yNDgiXSwidHlwZSI6ImNsaWVudCJ9XX0.6kTCd_nE4DP8r6MaPyCRQK1v3319QEhhq1aza4M_Z2UX-ih8-QbqbVLH3y6RZiM7jDxu6F2WC7QMLrTMfN9Lhg
+  python_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - scheduler_games
+    command:
+      python -u app.py
+    ports:
+      - 8050:8050
+    environment:
+      DATABASE_URL: postgresql://root:password@postgres_db:5432/brawlstars
+      CLUB_ID: '#2YPY9LVV9'
+      DEV_ENV: 'yes'
+      API_TOKEN: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjUwNjI0Zjc0LTYxYmYtNDBjYS1iM2M2LThhOGQxOGVkOGFmYiIsImlhdCI6MTY1NDg5MTQ5OSwic3ViIjoiZGV2ZWxvcGVyLzk4NGFlMjc2LTEyYzUtMDRiNi02MzMxLWZmMWIxYmZjMTM2ZiIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiNzcuMjI1LjIxNy4yNDgiXSwidHlwZSI6ImNsaWVudCJ9XX0.6kTCd_nE4DP8r6MaPyCRQK1v3319QEhhq1aza4M_Z2UX-ih8-QbqbVLH3y6RZiM7jDxu6F2WC7QMLrTMfN9Lhg
+

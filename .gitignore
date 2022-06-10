@@ -130,3 +130,5 @@ dmypy.json
 
 # Test file
 test.py
+
+postgres/
