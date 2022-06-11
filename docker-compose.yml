@@ -3,13 +3,10 @@ version: '3'
 services:
   postgres_db:
     image: postgres:11.1
-    environment:   # Set up postgres database name and password
-      POSTGRES_PASSWORD: SET_PASSWORD_TO_SECURE_LOCATION_IN_NEXT_VERSION
-      POSTGRES_DB: brawlstars
-      POSTGRES_USER: root
+    env_file:
+      - .db-secrets
     expose:
       - "5432"
-
     volumes:
       - ./postgres:/docker-entrypoint-initdb.d
       - ./sql_scripts/create_club_league_games_table.sql:/docker-entrypoint-initdb.d/create_club_league_games_table.sql
@@ -20,6 +17,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
   scheduler_members:
     build:
       context: .
@@ -28,11 +26,9 @@ services:
       - postgres_db
     command:
       python -u scheduled_jobs/get_club_members.py
-    environment:
-      DATABASE_URL: postgresql://root:SET_PASSWORD_TO_SECURE_LOCATION_IN_NEXT_VERSION@postgres_db:5432/brawlstars
-      CLUB_ID: '#2YPY9LVV9'
-      DEV_ENV: 'yes'
-      API_TOKEN: SET_TOKEN_TO_SECURE_LOCATION_IN_NEXT_VERSION
+    env_file:
+      - .env
+
   scheduler_games:
     build:
       context: .
@@ -41,11 +37,9 @@ services:
       - scheduler_members
     command:
       python -u scheduled_jobs/get_club_league_games.py
-    environment:
-      DATABASE_URL: postgresql://root:SET_PASSWORD_TO_SECURE_LOCATION_IN_NEXT_VERSION@postgres_db:5432/brawlstars
-      CLUB_ID: '#2YPY9LVV9'
-      DEV_ENV: 'yes'
-      API_TOKEN: SET_TOKEN_TO_SECURE_LOCATION_IN_NEXT_VERSION
+    env_file:
+      - .env
+
   python_app:
     build:
       context: .
@@ -56,9 +50,5 @@ services:
       python -u app.py
     ports:
       - 8050:8050
-    environment:
-      DATABASE_URL: postgresql://root:SET_PASSWORD_TO_SECURE_LOCATION_IN_NEXT_VERSION@postgres_db:5432/brawlstars
-      CLUB_ID: '#2YPY9LVV9'
-      DEV_ENV: 'yes'
-      API_TOKEN: SET_TOKEN_TO_SECURE_LOCATION_IN_NEXT_VERSION
-
+    env_file:
+      - .env
